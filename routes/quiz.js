@@ -10,6 +10,31 @@ const normalizeCode = (value) => {
   return code;
 };
 
+// CHECK TEAM CODE  ->  GET /api/quiz/check-code?tCode=ed123
+// Returns: { allowed: true }  or  { allowed: false, message }
+router.get("/check-code", async (req, res, next) => {
+  try {
+    const code = normalizeCode(req.query.tCode);
+    if (!code) {
+      return res.status(400).json({ message: "A valid team code is required" });
+    }
+
+    // exists() is lighter than find(): it only checks, it doesn't load the document
+    const alreadySubmitted = await Submission.exists({ tCode: code });
+
+    if (alreadySubmitted) {
+      return res.status(409).json({
+        allowed: false,
+        message: "This team code has already submitted the quiz",
+      });
+    }
+
+    return res.status(200).json({ allowed: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // SAVE A QUIZ  ->  POST /api/quiz/submit
 // Body: { tCode, ans: [{ q, sel }, ...] }   (extra fields like score/cor are ignored)
 router.post("/submit", async (req, res, next) => {
