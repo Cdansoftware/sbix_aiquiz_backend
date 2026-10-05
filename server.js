@@ -1,4 +1,5 @@
 require("dotenv").config();
+const cors = require("cors"); // 1. Import cors
 
 const connectDB = require("./config/db");
 const Submission = require("./models/Submission");
@@ -8,6 +9,16 @@ if (!process.env.MONGO_URI) {
   console.error("Missing environment variable: MONGO_URI");
   process.exit(1);
 }
+
+// 2. Enable CORS Middleware before routes execute
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "*", // Production me specific CLIENT_URL ya dev me '*'
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 const PORT = process.env.PORT || 5000;
 
