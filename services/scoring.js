@@ -7,6 +7,11 @@ const OPTION_COUNT = 4;
  * Grades a submission on the server.
  * The client's own `score` and `cor` values are ignored, so nobody can
  * send a fake score. Only the chosen option (`sel`) of each question is used.
+ *
+ * Returns:
+ *   score     = correct / total      * 100   (used for the main ranking)
+ *   accuracy  = correct / attempted  * 100   (first tie-breaker)
+ *   attempted = questions that got a valid answer
  */
 function gradeSubmission(clientAnswers) {
   const picked = new Map();
@@ -25,15 +30,22 @@ function gradeSubmission(clientAnswers) {
   }
 
   let correct = 0;
+  let attempted = 0;
   const ans = ANSWER_KEY.map((cor, i) => {
     const q = i + 1;
     const sel = picked.has(q) ? picked.get(q) : null;
+    if (sel !== null) attempted++;
     if (sel === cor) correct++;
     return { q, sel, cor };
   });
 
   const score = Number(((correct / TOTAL) * 100).toFixed(1));
-  return { ans, score, correct, total: TOTAL };
+  // 2 decimals so that e.g. 14/19 and 15/20 never collapse into the same number
+  const accuracy = attempted
+    ? Number(((correct / attempted) * 100).toFixed(2))
+    : 0;
+
+  return { ans, score, correct, attempted, accuracy, total: TOTAL };
 }
 
 module.exports = { gradeSubmission };

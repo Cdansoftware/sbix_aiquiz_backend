@@ -3,6 +3,7 @@ const cors = require("cors");
 const path = require("path");
 const helmet = require("helmet");
 const quizRoutes = require("./routes/quiz");
+const adminRoutes = require("./routes/admin");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
@@ -53,6 +54,7 @@ app.get("/", (req, res) => {
 
 // 4. API Routes
 app.use("/api/quiz", quizRoutes);
+app.use("/api/admin", adminRoutes);
 
 // 5. Error Handling Middlewares
 app.use(notFound);
